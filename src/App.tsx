@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { mockAssets } from './data/mockAssets';
 import { AssetCardGrid } from './components/AssetCardGrid';
 import { AssetDataTable } from './components/AssetDataTable';
@@ -7,8 +7,11 @@ import { AssetViewer } from './components/AssetViewer';
 import { Button } from './components/ui/button';
 import { Plus, Download, Trash2 } from 'lucide-react';
 import { AssetType, FileStatus, Asset } from './types/asset';
+import { fetchAssetsFromSupabase } from './services/assets';
+import { isSupabaseConfigured } from './lib/supabaseClient';
 
 export default function App() {
+  const [assets, setAssets] = useState<Asset[]>(mockAssets);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'minimal' | 'horizontal'>('comfortable');
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,8 +22,22 @@ export default function App() {
   const [selectedAssetForViewer, setSelectedAssetForViewer] = useState<Asset | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let isMounted = true;
+    fetchAssetsFromSupabase().then((result) => {
+      if (!isMounted) return;
+      // Use Supabase data even if empty; this helps verify DB wiring
+      console.log('[Supabase] fetched assets:', result.length);
+      setAssets(result);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const filteredAssets = useMemo(() => {
-    return mockAssets.filter((asset) => {
+    return assets.filter((asset) => {
       const matchesSearch = asset.assetId.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            asset.caseId.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            asset.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -51,7 +68,7 @@ export default function App() {
       
       return matchesSearch && matchesCategory && matchesType && matchesStatus && matchesDateRange;
     });
-  }, [searchQuery, selectedCategory, selectedType, selectedStatus, dateRange]);
+  }, [assets, searchQuery, selectedCategory, selectedType, selectedStatus, dateRange]);
 
   const handleAssetClick = (asset: Asset) => {
     setSelectedAssetForViewer(asset);
@@ -77,6 +94,13 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm text-gray-500">
+          Data source: {isSupabaseConfigured ? (
+            <span className="text-green-600 font-medium">Supabase</span>
+          ) : (
+            <span className="text-gray-600">Mock data</span>
+          )}
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -119,7 +143,7 @@ export default function App() {
       {selectedAssetForViewer && (
         <AssetViewer
           asset={selectedAssetForViewer}
-          allAssets={mockAssets}
+          allAssets={assets}
           open={viewerOpen}
           onClose={handleCloseViewer}
           onNavigate={handleNavigateAsset}
