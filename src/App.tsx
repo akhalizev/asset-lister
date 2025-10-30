@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { mockAssets } from './data/mockAssets';
+import { mockAssets, generateMockAssets } from './data/mockAssets';
 import { AssetCardGrid } from './components/AssetCardGrid';
 import { AssetDataTable } from './components/AssetDataTable';
 import { AssetFilters, DateRange } from './components/AssetFilters';
@@ -9,8 +9,10 @@ import { Plus, Download, Trash2 } from 'lucide-react';
 import { AssetType, FileStatus, Asset } from './types/asset';
 import { fetchAssetsFromSupabase } from './services/assets';
 import { isSupabaseConfigured } from './lib/supabaseClient';
+import { SupabaseSeeder } from './components/SupabaseSeeder';
 
 export default function App() {
+  const [useLargeDataset, setUseLargeDataset] = useState(false);
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'minimal' | 'horizontal'>('comfortable');
@@ -21,6 +23,17 @@ export default function App() {
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
   const [selectedAssetForViewer, setSelectedAssetForViewer] = useState<Asset | null>(null);
   const [viewerOpen, setViewerOpen] = useState(false);
+
+  // Generate large dataset when enabled
+  useEffect(() => {
+    if (useLargeDataset) {
+      const largeDataset = generateMockAssets(5000);
+      setAssets(largeDataset);
+      console.log(`[Mock] Generated ${largeDataset.length} assets for virtualization demo`);
+    } else {
+      setAssets(mockAssets);
+    }
+  }, [useLargeDataset]);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -94,11 +107,30 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm text-gray-500">
-          Data source: {isSupabaseConfigured ? (
-            <span className="text-green-600 font-medium">Supabase</span>
-          ) : (
-            <span className="text-gray-600">Mock data</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-gray-500">
+              Data source: {isSupabaseConfigured ? (
+                <span className="text-green-600 font-medium">Supabase</span>
+              ) : (
+                <span className="text-gray-600">Mock data ({assets.length} assets)</span>
+              )}
+            </div>
+            {!isSupabaseConfigured && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUseLargeDataset(!useLargeDataset)}
+                className="text-xs"
+              >
+                {useLargeDataset ? 'Switch to Small Dataset' : 'Load Large Dataset (5K)'}
+              </Button>
+            )}
+          </div>
+          {isSupabaseConfigured && (
+            <div className="border-t pt-2">
+              <SupabaseSeeder />
+            </div>
           )}
         </div>
       </header>

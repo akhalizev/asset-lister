@@ -1,7 +1,7 @@
-import { Asset } from '../types/asset';
+import { Asset, AssetType, FileStatus } from '../types/asset';
 import exampleImage from 'figma:asset/f7bdc7c3675a201b22e82f4db7988551fa4bd8e9.png';
 
-export const mockAssets: Asset[] = [
+const baseAssets: Asset[] = [
   {
     id: '1',
     assetId: 'AST-2024-001',
@@ -307,3 +307,145 @@ export const mockAssets: Asset[] = [
     thumbnail: undefined
   }
 ];
+
+// Configuration for generating large datasets
+const categories = [
+  'Body Cam', 'Crime Scene', 'Interview', 'Dash Cam', 'Documentation',
+  'Surveillance', 'Audio Recording', 'Aerial', 'Training'
+];
+
+const devices = [
+  'Axon Body 3', 'Canon EOS R5', 'Olympus WS-853', 'Watchguard 4RE',
+  'Records System', 'Nikon D850', 'Store CCTV', 'Dispatch Console',
+  'Evidence System', 'DJI Mavic 3', 'Training Camera', 'Interview Room Cam',
+  'Axon Fleet 3', 'Panasonic HC-X2000', 'Sony A7R IV'
+];
+
+const stations = [
+  'Station 01', 'Station 02', 'Station 03', 'Station 04', 'Station 05',
+  'Crime Lab', 'Dispatch Center', 'Training Facility'
+];
+
+const officerNames = [
+  'Officer J. Martinez', 'Det. S. Rodriguez', 'Det. M. Chen',
+  'Officer T. Johnson', 'Officer K. Williams', 'Officer D. Brown',
+  'Officer R. Garcia', 'Det. A. Thompson', 'Dispatcher L. Anderson',
+  'Evidence Tech P. Wilson', 'Officer E. Davis', 'Forensic Tech M. Lee',
+  'Sgt. C. Moore', 'Officer L. Taylor', 'Officer M. Anderson',
+  'Det. K. Patel', 'Officer S. White', 'Sgt. J. Clark'
+];
+
+const descriptions = [
+  'Routine traffic stop on Main Street, driver cited for speeding',
+  'Interior photos of burglary scene',
+  'Witness interview regarding incident',
+  'High-speed pursuit on Highway 101 northbound',
+  'Complete incident report with supporting documentation',
+  'Arrest of suspect for outstanding warrant',
+  'Multi-angle photos of three-vehicle collision',
+  'Store surveillance video showing suspect',
+  'Emergency call reporting suspicious activity',
+  'Complete evidence inventory from investigation',
+  'Aerial drone footage of search area',
+  'Community policing event at local school',
+  'Close-up forensic photos of recovered evidence',
+  'Active shooter response training scenario',
+  'Standard patrol shift footage',
+  'Formal interrogation of arrested suspect',
+  'Foot pursuit through residential area',
+  'Weapons confiscation documentation',
+  'Drug seizure evidence collection',
+  'Field sobriety test recording'
+];
+
+const retentionSpans = ['90 days', '1 year', '2 years', '3 years', '5 years', '7 years', '10 years'];
+
+function formatDuration(minutes: number): string {
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  const secs = Math.floor((minutes % 1) * 60);
+  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function formatSizeMB(mb: number): string {
+  if (mb < 1) return `${(mb * 1024).toFixed(1)} KB`;
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+  return `${(mb / 1024).toFixed(1)} GB`;
+}
+
+function randomDate(start: Date, end: Date): Date {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+function generateMockAsset(id: number): Asset {
+  const assetType: AssetType = (['image', 'video', 'audio', 'document'] as const)[
+    Math.floor(Math.random() * 4)
+  ];
+  const fileStatus: FileStatus = Math.random() > 0.85 ? 'expired' : 'available';
+  const category = categories[Math.floor(Math.random() * categories.length)];
+  const device = devices[Math.floor(Math.random() * devices.length)];
+  const station = stations[Math.floor(Math.random() * stations.length)];
+  const userName = officerNames[Math.floor(Math.random() * officerNames.length)];
+  const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+  const retentionSpan = retentionSpans[Math.floor(Math.random() * retentionSpans.length)];
+  
+  const caseId = Math.random() > 0.1 
+    ? `CASE-2024-${String(1500 + Math.floor(Math.random() * 100)).padStart(4, '0')}`
+    : 'N/A';
+  const cadId = Math.random() > 0.1 
+    ? `CAD-${String(45500 + Math.floor(Math.random() * 350)).padStart(5, '0')}`
+    : 'N/A';
+  
+  const startDate = new Date('2024-01-01');
+  const endDate = new Date('2024-12-31');
+  const capturedOn = randomDate(startDate, endDate);
+  const uploaded = new Date(capturedOn.getTime() + Math.random() * 24 * 60 * 60 * 1000);
+  
+  let assetDuration = 'N/A';
+  let assetSize = '0 MB';
+  
+  if (assetType === 'video') {
+    const minutes = Math.random() * 180 + 5; // 5 minutes to 3 hours
+    assetDuration = formatDuration(minutes);
+    assetSize = formatSizeMB(minutes * 15 + Math.random() * 100); // ~15 MB per minute + variance
+  } else if (assetType === 'audio') {
+    const minutes = Math.random() * 60 + 1; // 1 minute to 1 hour
+    assetDuration = formatDuration(minutes);
+    assetSize = formatSizeMB(minutes * 1.5 + Math.random() * 10); // ~1.5 MB per minute + variance
+  } else if (assetType === 'image') {
+    assetSize = formatSizeMB(Math.random() * 50 + 2); // 2-52 MB
+  } else {
+    assetSize = formatSizeMB(Math.random() * 5 + 0.5); // 0.5-5.5 MB
+  }
+  
+  return {
+    id: String(id),
+    assetId: `AST-2024-${String(id).padStart(6, '0')}`,
+    category,
+    caseId,
+    cadId,
+    description,
+    capturedOn: capturedOn.toISOString(),
+    uploaded: uploaded.toISOString(),
+    assetType,
+    device,
+    station,
+    userName,
+    fileStatus,
+    retentionSpan,
+    assetDuration,
+    assetSize,
+    thumbnail: assetType === 'image' && Math.random() > 0.7 ? exampleImage : undefined
+  };
+}
+
+/**
+ * Generate a large mock dataset for testing virtualization and lazy loading
+ * @param count Number of assets to generate (default: 10000)
+ */
+export function generateMockAssets(count: number = 10000): Asset[] {
+  return Array.from({ length: count }, (_, i) => generateMockAsset(i + 1));
+}
+
+// Export base assets for backward compatibility
+export const mockAssets: Asset[] = baseAssets;

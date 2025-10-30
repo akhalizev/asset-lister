@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
   ColumnDef,
   SortingState,
@@ -12,6 +11,7 @@ import {
   RowSelectionState,
   ColumnSizingState,
 } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Asset } from '../types/asset';
 import { Checkbox } from './ui/checkbox';
 import { Badge } from './ui/badge';
@@ -302,7 +302,6 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
@@ -315,19 +314,24 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
       columnVisibility,
       columnSizing,
     },
-    initialState: {
-      pagination: {
-        pageSize: 50,
-      },
-    },
+  });
+
+  const { rows } = table.getRowModel();
+  
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 50, // Estimate row height
+    overscan: 10, // Render extra rows outside viewport
   });
 
   return (
     <div className="space-y-4">
       <div className="border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={tableContainerRef} style={{ maxHeight: '600px', overflowY: 'auto' }}>
           <Table style={{ width: table.getCenterTotalSize() }}>
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-10 bg-white">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
@@ -361,30 +365,48 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => onRowClick?.(row.original)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell 
-                        key={cell.id}
+            <TableBody
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                position: 'relative',
+              }}
+            >
+              {rows.length ? (
+                <>
+                  {virtualizer.getVirtualItems().map((virtualRow) => {
+                    const row = rows[virtualRow.index];
+                    return (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && 'selected'}
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => onRowClick?.(row.original)}
                         style={{
-                          width: cell.column.getSize(),
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
                         }}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell 
+                            key={cell.id}
+                            style={{
+                              width: cell.column.getSize(),
+                            }}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })}
+                </>
               ) : (
                 <TableRow>
                   <TableCell
@@ -400,33 +422,21 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
         </div>
       </div>
 
-      {/* Pagination */}
+      {/* Stats and Info */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600">
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          Showing {virtualizer.getVirtualItems().length > 0 ? virtualizer.getVirtualItems()[0].index + 1 : 0}-
+          {virtualizer.getVirtualItems().length > 0 
+            ? virtualizer.getVirtualItems()[virtualizer.getVirtualItems().length - 1].index + 1 
+            : 0} of {rows.length} row(s). {table.getFilteredSelectedRowModel().rows.length} selected.
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-gray-600">
-            Page {table.getState().pagination.pageIndex + 1} of{' '}
-            {table.getPageCount()}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+        <div className="text-sm text-gray-500">
+          {data.length >= 1000 && (
+            <span className="inline-flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              Virtualized rendering enabled
+            </span>
+          )}
         </div>
       </div>
     </div>
