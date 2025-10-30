@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -331,6 +331,14 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto" ref={tableContainerRef} style={{ maxHeight: '600px', overflowY: 'auto' }}>
           <Table style={{ width: table.getCenterTotalSize() }}>
+            {/* Ensure consistent column widths between header and body */}
+            {table.getHeaderGroups().length > 0 && (
+              <colgroup>
+                {table.getHeaderGroups()[0].headers.map((header) => (
+                  <col key={header.id} style={{ width: header.getSize() }} />
+                ))}
+              </colgroup>
+            )}
             <TableHeader className="sticky top-0 z-10 bg-white">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -338,7 +346,6 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
                     <TableHead 
                       key={header.id}
                       style={{
-                        width: header.getSize(),
                         position: 'relative',
                       }}
                     >
@@ -393,9 +400,6 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
                         {row.getVisibleCells().map((cell) => (
                           <TableCell 
                             key={cell.id}
-                            style={{
-                              width: cell.column.getSize(),
-                            }}
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
