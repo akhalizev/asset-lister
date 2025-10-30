@@ -372,14 +372,20 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
                 </TableRow>
               ))}
             </TableHeader>
-            <TableBody
-              style={{
-                height: `${virtualizer.getTotalSize()}px`,
-                position: 'relative',
-              }}
-            >
+            <TableBody>
               {rows.length ? (
                 <>
+                  {/* Top spacer to push the first rendered row into view position */}
+                  {(() => {
+                    const items = virtualizer.getVirtualItems();
+                    const top = items.length > 0 ? items[0].start : 0;
+                    return top > 0 ? (
+                      <TableRow aria-hidden>
+                        <TableCell colSpan={columns.length} style={{ height: top }} />
+                      </TableRow>
+                    ) : null;
+                  })()}
+
                   {virtualizer.getVirtualItems().map((virtualRow) => {
                     const row = rows[virtualRow.index];
                     return (
@@ -388,19 +394,10 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
                         data-state={row.getIsSelected() && 'selected'}
                         className="cursor-pointer hover:bg-gray-50"
                         onClick={() => onRowClick?.(row.original)}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: `${virtualRow.size}px`,
-                          transform: `translateY(${virtualRow.start}px)`,
-                        }}
+                        style={{ height: virtualRow.size }}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell 
-                            key={cell.id}
-                          >
+                          <TableCell key={cell.id}>
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()
@@ -410,6 +407,19 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
                       </TableRow>
                     );
                   })}
+
+                  {/* Bottom spacer to fill the remaining scrollable space */}
+                  {(() => {
+                    const items = virtualizer.getVirtualItems();
+                    const total = virtualizer.getTotalSize();
+                    const end = items.length > 0 ? items[items.length - 1].end : 0;
+                    const bottom = Math.max(total - end, 0);
+                    return bottom > 0 ? (
+                      <TableRow aria-hidden>
+                        <TableCell colSpan={columns.length} style={{ height: bottom }} />
+                      </TableRow>
+                    ) : null;
+                  })()}
                 </>
               ) : (
                 <TableRow>
