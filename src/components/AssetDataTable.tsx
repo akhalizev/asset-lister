@@ -18,6 +18,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { FileText, Image, Video, Headphones, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ImageWithFallback } from './figma/ImageWithFallback';
 
 const fileTypeConfig = {
   document: { icon: FileText, color: 'text-red-500', label: 'Document' },
@@ -50,69 +51,120 @@ function formatUsername(fullName: string): string {
 interface AssetDataTableProps {
   data: Asset[];
   onRowClick?: (asset: Asset) => void;
+  variant?: 'id' | 'thumbnail';
 }
 
-export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
+export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
 
-  const columns: ColumnDef<Asset>[] = [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          onClick={(e) => e.stopPropagation()}
-        />
-      ),
+  const columns: ColumnDef<Asset>[] = [];
+
+  // Select column
+  columns.push({
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        onClick={(e) => e.stopPropagation()}
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    enableResizing: false,
+    size: 50,
+  });
+
+  // Asset Thumbnail column (only in thumbnail variant)
+  if (variant === 'thumbnail') {
+    columns.push({
+      id: 'assetThumbnail',
+      header: () => (<span className="px-2">Asset Thumbnail</span>),
       enableSorting: false,
-      enableHiding: false,
-      enableResizing: false,
-      size: 50,
-    },
-    {
-      accessorKey: 'assetId',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="h-8 px-2"
-          >
-            Asset ID
-            {column.getIsSorted() === 'asc' ? (
-              <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown className="ml-2 h-4 w-4" />
-            ) : (
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            )}
-          </Button>
-        );
-      },
       cell: ({ row }) => {
-        const fileConfig = fileTypeConfig[row.original.assetType];
+        const asset = row.original;
+        const fileConfig = fileTypeConfig[asset.assetType];
         const Icon = fileConfig.icon;
+        const isVisual = asset.assetType === 'image' || asset.assetType === 'video';
         return (
-          <div className="flex items-center gap-2">
-            <Icon className={`w-4 h-4 ${fileConfig.color} shrink-0`} />
-            <span className="font-mono text-sm">{row.getValue('assetId')}</span>
+          <div className="w-[110px] h-[60px] rounded overflow-hidden flex items-center justify-center bg-gray-100">
+            {isVisual && asset.thumbnail ? (
+              <ImageWithFallback
+                src={asset.thumbnail}
+                alt={asset.assetId}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Icon className={`w-6 h-6 ${fileConfig.color}`} aria-label="Asset thumbnail placeholder" />
+            )}
           </div>
         );
       },
+      size: 160,
+      enableResizing: true,
+    });
+  }
+
+  // Asset ID column
+  columns.push({
+    accessorKey: 'assetId',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="h-8 px-2"
+        >
+          Asset ID
+          {column.getIsSorted() === 'asc' ? (
+            <ArrowUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === 'desc' ? (
+            <ArrowDown className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      );
     },
-    {
+    cell: ({ row }) => {
+      const asset = row.original;
+      const fileConfig = fileTypeConfig[asset.assetType];
+      if (variant === 'thumbnail') {
+        return (
+          <div className="min-w-0 flex flex-col">
+            <div className="font-mono text-sm truncate" title={asset.assetId}>{asset.assetId}</div>
+            <div className="text-xs text-gray-500 truncate" title={fileConfig.label}>{fileConfig.label}</div>
+            <div className="mt-0.5">
+              <Badge className={statusColors[asset.fileStatus]} variant="outline">
+                {asset.fileStatus}
+              </Badge>
+            </div>
+          </div>
+        );
+      }
+      const Icon = fileConfig.icon;
+      return (
+        <div className="flex items-center gap-2">
+          <Icon className={`w-4 h-4 ${fileConfig.color} shrink-0`} />
+          <span className="font-mono text-sm">{row.getValue('assetId')}</span>
+        </div>
+      );
+    },
+    size: variant === 'thumbnail' ? 300 : undefined,
+  });
+
+  columns.push({
       accessorKey: 'category',
       header: ({ column }) => {
         return (
@@ -132,22 +184,22 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
           </Button>
         );
       },
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'caseId',
       header: 'Case ID',
       cell: ({ row }) => (
         <span className="font-mono text-sm">{row.getValue('caseId')}</span>
       ),
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'cadId',
       header: 'CAD ID',
       cell: ({ row }) => (
         <span className="font-mono text-sm">{row.getValue('cadId')}</span>
       ),
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'capturedOn',
       header: ({ column }) => {
         return (
@@ -175,8 +227,8 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
           </span>
         );
       },
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'uploaded',
       header: ({ column }) => {
         return (
@@ -204,24 +256,24 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
           </span>
         );
       },
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'assetType',
       header: 'Type',
       cell: ({ row }) => {
         const type = row.getValue('assetType') as keyof typeof fileTypeConfig;
         return fileTypeConfig[type].label;
       },
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'device',
       header: 'Device',
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'station',
       header: 'Station',
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'userName',
       header: 'User Name',
       cell: ({ row }) => {
@@ -235,8 +287,9 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
           </div>
         );
       },
-    },
-    {
+    });
+  if (variant !== 'thumbnail') {
+    columns.push({
       accessorKey: 'fileStatus',
       header: ({ column }) => {
         return (
@@ -264,16 +317,17 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
           </Badge>
         );
       },
-    },
-    {
+    });
+  }
+  columns.push({
       accessorKey: 'retentionSpan',
       header: 'Retention',
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'assetDuration',
       header: 'Duration',
-    },
-    {
+    });
+  columns.push({
       accessorKey: 'assetSize',
       header: ({ column }) => {
         return (
@@ -293,8 +347,8 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
           </Button>
         );
       },
-    },
-  ];
+    });
+  
 
   const table = useReactTable({
     data,
@@ -322,7 +376,7 @@ export function AssetDataTable({ data, onRowClick }: AssetDataTableProps) {
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 50, // Estimate row height
+    estimateSize: () => 72, // Estimate row height to accommodate 60px thumbnails
     overscan: 10, // Render extra rows outside viewport
   });
 

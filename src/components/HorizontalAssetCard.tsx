@@ -1,3 +1,4 @@
+import React from 'react';
 import { Asset } from '../types/asset';
 import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';

@@ -16,6 +16,7 @@ export default function App() {
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'minimal' | 'horizontal'>('comfortable');
+  const [tableVariant, setTableVariant] = useState<'id' | 'thumbnail'>('id');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedType, setSelectedType] = useState<AssetType | 'all'>('all');
@@ -141,6 +142,8 @@ export default function App() {
           onViewModeChange={setViewMode}
           density={density}
           onDensityChange={setDensity}
+          tableVariant={tableVariant}
+          onTableVariantChange={setTableVariant}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           selectedCategory={selectedCategory}
@@ -167,6 +170,7 @@ export default function App() {
         ) : (
           <AssetDataTable
             data={filteredAssets}
+            variant={tableVariant}
             onRowClick={handleAssetClick}
           />
         )}

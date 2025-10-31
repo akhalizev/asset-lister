@@ -18,6 +18,8 @@ interface AssetFiltersProps {
   onViewModeChange: (mode: 'grid' | 'list') => void;
   density: 'comfortable' | 'compact' | 'minimal' | 'horizontal';
   onDensityChange: (density: 'comfortable' | 'compact' | 'minimal' | 'horizontal') => void;
+  tableVariant?: 'id' | 'thumbnail';
+  onTableVariantChange?: (variant: 'id' | 'thumbnail') => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   selectedCategory: string;
@@ -36,6 +38,8 @@ export function AssetFilters({
   onViewModeChange,
   density,
   onDensityChange,
+  tableVariant = 'id',
+  onTableVariantChange,
   searchQuery,
   onSearchChange,
   selectedCategory,
@@ -206,6 +210,27 @@ export function AssetFilters({
             <List className="w-4 h-4" />
           </Button>
         </div>
+
+        {viewMode === 'list' && (
+          <div className="flex gap-1 border rounded-md p-1" title="Table view">
+            <Button
+              variant={tableVariant === 'id' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-2"
+              onClick={() => onTableVariantChange?.('id')}
+            >
+              ID
+            </Button>
+            <Button
+              variant={tableVariant === 'thumbnail' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="h-8 px-2"
+              onClick={() => onTableVariantChange?.('thumbnail')}
+            >
+              Thumb
+            </Button>
+          </div>
+        )}
         
         {viewMode === 'grid' && (
           <Select value={density} onValueChange={(value) => onDensityChange(value as 'comfortable' | 'compact' | 'minimal' | 'horizontal')}>
