@@ -29,7 +29,8 @@ const fileTypeConfig = {
 
 const statusColors = {
   available: 'bg-green-100 text-green-800',
-  expired: 'bg-red-100 text-red-800'
+  expired: 'bg-red-100 text-red-800',
+  recoverable: 'bg-yellow-100 text-yellow-800'
 };
 
 function formatUsername(fullName: string): string {

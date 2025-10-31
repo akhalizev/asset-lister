@@ -187,6 +187,7 @@ export function AssetFilters({
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="available">Available</SelectItem>
             <SelectItem value="expired">Expired</SelectItem>
+            <SelectItem value="recoverable">Recoverable</SelectItem>
           </SelectContent>
         </Select>
         

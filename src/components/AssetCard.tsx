@@ -21,7 +21,8 @@ const fileTypeConfig = {
 
 const statusColors = {
   available: 'bg-green-100 text-green-800',
-  expired: 'bg-red-100 text-red-800'
+  expired: 'bg-red-100 text-red-800',
+  recoverable: 'bg-yellow-100 text-yellow-800'
 };
 
 function formatUsername(fullName: string): string {
@@ -66,7 +67,7 @@ export function AssetCard({ asset, isSelected, onSelect, onClick }: AssetCardPro
             src={asset.thumbnail}
             alt={asset.name}
             className="w-full h-full object-cover"
-          />
+          />  
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
             <Icon className="w-16 h-16 text-gray-300" />

@@ -1,6 +1,6 @@
 export type AssetType = 'image' | 'video' | 'audio' | 'document';
 
-export type FileStatus = 'available' | 'expired';
+export type FileStatus = 'available' | 'expired' | 'recoverable';
 
 export interface Asset {
   id: string;

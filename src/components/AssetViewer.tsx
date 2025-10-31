@@ -32,7 +32,8 @@ const statusColors = {
 
 const statusLabels = {
   available: 'Available',
-  expired: 'Expired'
+  expired: 'Expired',
+  recoverable: 'Recoverable'
 };
 
 export function AssetViewer({ asset, allAssets, open, onClose, onNavigate }: AssetViewerProps) {
