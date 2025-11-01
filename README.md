@@ -59,4 +59,15 @@
   Notes:
   - If you already have a full `http(s)` URL in `thumbnail`, the app will use it as-is.
   - Bucket name defaults to `thumbnails`. If you need a different bucket, we can parameterize it.
+
+  ## RLS Policy Fix
+
+  If you're seeing a performance warning about duplicate RLS policies for the `assets` table, you can fix it by running the migration in `supabase/migrations/fix_duplicate_rls_policies.sql`.
+
+  To apply the migration:
+  1. Open your Supabase dashboard → SQL Editor
+  2. Copy and paste the contents of `supabase/migrations/fix_duplicate_rls_policies.sql`
+  3. Run the SQL script
+
+  This will consolidate the duplicate SELECT policies into a single optimized policy.
   
