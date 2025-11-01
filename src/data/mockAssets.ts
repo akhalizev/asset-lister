@@ -1,5 +1,32 @@
 import { Asset, AssetType, FileStatus } from '../types/asset';
-import exampleImage from 'figma:asset/f7bdc7c3675a201b22e82f4db7988551fa4bd8e9.png';
+// Import multiple thumbnail images for variety
+import thumb1 from 'figma:asset/f7bdc7c3675a201b22e82f4db7988551fa4bd8e9.png';
+import thumb2 from 'figma:asset/332b24b3de4e262662ba06ac0d355e3b046308be.png';
+import thumb3 from 'figma:asset/410091be46419428c5e5c59d9da30f70a565cea7.png';
+import thumb4 from 'figma:asset/4becfd878069c4df0ebfec7ffb57749b20f5c55f.png';
+import thumb5 from 'figma:asset/69e64033d53d8fe3afeedc6660ce8adb3bb1b10a.png';
+import thumb6 from 'figma:asset/747a27fe416ebfaf57b25beae190a98036e77d0e.png';
+import thumb7 from 'figma:asset/9fcda7faf487ffa9a989ea8f44315905f0ff23fa.png';
+import thumb8 from 'figma:asset/d032069d0e81c306f7036f6e92d6554c3a1b6eaa.png';
+import thumb9 from 'figma:asset/d77ed8d07dbad509bd7ab5e286c6e31590bb0f69.png';
+import thumb10 from 'figma:asset/f3364c7b257c0b3cc919414fdcfa749e50bbdc2f.png';
+import thumb11 from 'figma:asset/f7eaa289a8ed2120f1d1130383a6e1c0725fc497.png';
+
+// Array of thumbnails to cycle through for images and videos
+const thumbnailImages = [
+  thumb1, thumb2, thumb3, thumb4, thumb5, thumb6, 
+  thumb7, thumb8, thumb9, thumb10, thumb11
+];
+
+// Function to get a thumbnail for an asset based on its ID (for consistent assignment)
+function getThumbnailForAsset(assetId: string, assetType: AssetType): string | undefined {
+  if (assetType === 'image' || assetType === 'video') {
+    // Use assetId to determine which thumbnail (for consistency)
+    const hash = assetId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return thumbnailImages[hash % thumbnailImages.length];
+  }
+  return undefined;
+}
 
 const baseAssets: Asset[] = [
   {
@@ -19,7 +46,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:12:34',
     assetSize: '245.8 MB',
-    thumbnail: exampleImage
+    thumbnail: getThumbnailForAsset('AST-2024-001', 'video')
   },
   {
     id: '2',
@@ -38,7 +65,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: 'N/A',
     assetSize: '8.4 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-002', 'image')
   },
   {
     id: '3',
@@ -76,7 +103,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:18:45',
     assetSize: '356.2 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-004', 'video')
   },
   {
     id: '5',
@@ -114,7 +141,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:08:23',
     assetSize: '165.4 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-006', 'video')
   },
   {
     id: '7',
@@ -133,7 +160,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '3 years',
     assetDuration: 'N/A',
     assetSize: '45.7 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-007', 'image')
   },
   {
     id: '8',
@@ -152,7 +179,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: '00:03:47',
     assetSize: '128.9 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-008', 'video')
   },
   {
     id: '9',
@@ -209,7 +236,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '5 years',
     assetDuration: '00:32:18',
     assetSize: '892.3 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-011', 'video')
   },
   {
     id: '12',
@@ -228,7 +255,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '1 year',
     assetDuration: '01:15:22',
     assetSize: '478.6 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-012', 'video')
   },
   {
     id: '13',
@@ -247,7 +274,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: 'N/A',
     assetSize: '12.6 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-013', 'image')
   },
   {
     id: '14',
@@ -266,7 +293,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '2 years',
     assetDuration: '02:45:00',
     assetSize: '1.2 GB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-014', 'video')
   },
   {
     id: '15',
@@ -285,7 +312,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '90 days',
     assetDuration: '04:12:35',
     assetSize: '2.8 GB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-015', 'video')
   },
   {
     id: '16',
@@ -304,7 +331,7 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '01:23:45',
     assetSize: '624.3 MB',
-    thumbnail: undefined
+    thumbnail: getThumbnailForAsset('AST-2024-016', 'video')
   }
 ];
 
@@ -435,7 +462,7 @@ function generateMockAsset(id: number): Asset {
     retentionSpan,
     assetDuration,
     assetSize,
-    thumbnail: assetType === 'image' && Math.random() > 0.7 ? exampleImage : undefined
+    thumbnail: getThumbnailForAsset(`AST-2024-${String(id).padStart(6, '0')}`, assetType)
   };
 }
 

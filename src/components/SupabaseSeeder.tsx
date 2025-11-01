@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from './ui/button';
 import { seedSupabaseAssets, clearSupabaseAssets, getSupabaseAssetCount, testInsertSingleAsset } from '../services/seedSupabase';
-import { Database, Trash2, Loader2, TestTube } from 'lucide-react';
+import { updateAssetThumbnails, updateThumbnailsWithUrls, uploadThumbnailsToStorage, inspectThumbnailValues } from '../services/updateThumbnails';
+import { Database, Trash2, Loader2, TestTube, Image as ImageIcon } from 'lucide-react';
 
 export function SupabaseSeeder() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isUpdatingThumbnails, setIsUpdatingThumbnails] = useState(false);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [assetCount, setAssetCount] = useState<number | null>(null);
@@ -83,6 +85,90 @@ export function SupabaseSeeder() {
       setTimeout(() => setResult(null), 10000);
     } finally {
       setIsTesting(false);
+    }
+  };
+
+  const handleUpdateThumbnails = async (useStoragePaths: boolean = true, updateAll: boolean = false) => {
+    setIsUpdatingThumbnails(true);
+    setProgress(null);
+    setResult(null);
+
+    try {
+      const updateResult = await updateAssetThumbnails(useStoragePaths, updateAll, (current, total) => {
+        setProgress({ current, total });
+      });
+
+      setResult(
+        `✅ Updated thumbnails for ${updateResult.updated} assets. ${updateResult.errors > 0 ? `${updateResult.errors} errors.` : ''} ${updateResult.total === 0 ? 'Check console for details.' : ''}`
+      );
+      await loadAssetCount();
+      setTimeout(() => setResult(null), 5000);
+    } catch (error: any) {
+      setResult(`❌ Error: ${error.message || 'Failed to update thumbnails'}`);
+      console.error('[Update Thumbnails] Full error:', error);
+      setTimeout(() => setResult(null), 5000);
+    } finally {
+      setIsUpdatingThumbnails(false);
+      setProgress(null);
+    }
+  };
+
+  const handleUpdateThumbnailsWithUrls = async (updateAll: boolean = false) => {
+    setIsUpdatingThumbnails(true);
+    setProgress(null);
+    setResult(null);
+
+    try {
+      const updateResult = await updateThumbnailsWithUrls(updateAll);
+
+      setResult(
+        `✅ Updated thumbnails with URLs for ${updateResult.updated} assets. ${updateResult.errors > 0 ? `${updateResult.errors} errors.` : ''} ${updateResult.total === 0 ? 'Check console for details.' : ''}`
+      );
+      await loadAssetCount();
+      setTimeout(() => setResult(null), 5000);
+    } catch (error: any) {
+      setResult(`❌ Error: ${error.message || 'Failed to update thumbnails'}`);
+      console.error('[Update Thumbnails] Full error:', error);
+      setTimeout(() => setResult(null), 5000);
+    } finally {
+      setIsUpdatingThumbnails(false);
+      setProgress(null);
+    }
+  };
+
+  const handleCheckThumbnails = async () => {
+    setIsUpdatingThumbnails(true);
+    setResult(null);
+
+    try {
+      const checkResult = await uploadThumbnailsToStorage();
+      if (checkResult.errors === 0) {
+        setResult(`✅ All thumbnail files exist in storage!`);
+      } else {
+        setResult(`⚠️ Some thumbnail files are missing. Check console for details.`);
+      }
+      setTimeout(() => setResult(null), 5000);
+    } catch (error: any) {
+      setResult(`❌ Error: ${error.message || 'Failed to check thumbnails'}`);
+      setTimeout(() => setResult(null), 5000);
+    } finally {
+      setIsUpdatingThumbnails(false);
+    }
+  };
+
+  const handleInspectThumbnails = async () => {
+    setIsUpdatingThumbnails(true);
+    setResult(null);
+
+    try {
+      await inspectThumbnailValues(10);
+      setResult(`✅ Check console for thumbnail value inspection results`);
+      setTimeout(() => setResult(null), 5000);
+    } catch (error: any) {
+      setResult(`❌ Error: ${error.message || 'Failed to inspect thumbnails'}`);
+      setTimeout(() => setResult(null), 5000);
+    } finally {
+      setIsUpdatingThumbnails(false);
     }
   };
 
@@ -184,10 +270,117 @@ export function SupabaseSeeder() {
           variant="ghost"
           size="sm"
           onClick={loadAssetCount}
-          disabled={isSeeding || isClearing}
+          disabled={isSeeding || isClearing || isUpdatingThumbnails}
           className="text-xs"
         >
           Refresh Count
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap pt-2 border-t">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleInspectThumbnails}
+          disabled={isSeeding || isClearing || isUpdatingThumbnails || isTesting}
+          className="text-xs"
+          title="Inspect thumbnail values in database (check console)"
+        >
+          {isUpdatingThumbnails ? (
+            <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              Inspecting...
+            </>
+          ) : (
+            <>
+              <ImageIcon className="w-3 h-3 mr-1" />
+              Inspect Thumbnails
+            </>
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCheckThumbnails}
+          disabled={isSeeding || isClearing || isUpdatingThumbnails || isTesting}
+          className="text-xs"
+          title="Check if thumbnail files exist in Supabase Storage"
+        >
+          {isUpdatingThumbnails ? (
+            <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              Checking...
+            </>
+          ) : (
+            <>
+              <ImageIcon className="w-3 h-3 mr-1" />
+              Check Thumbnails
+            </>
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleUpdateThumbnails(true, false)}
+          disabled={isSeeding || isClearing || isUpdatingThumbnails || isTesting}
+          className="text-xs"
+          title="Update thumbnails using storage paths (only for assets without thumbnails)"
+        >
+          {isUpdatingThumbnails ? (
+            <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            <>
+              <ImageIcon className="w-3 h-3 mr-1" />
+              Update Thumbnails (Paths)
+            </>
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleUpdateThumbnails(true, true)}
+          disabled={isSeeding || isClearing || isUpdatingThumbnails || isTesting}
+          className="text-xs"
+          title="Update ALL image/video assets with thumbnails (overwrites existing)"
+        >
+          {isUpdatingThumbnails ? (
+            <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            <>
+              <ImageIcon className="w-3 h-3 mr-1" />
+              Update All Thumbnails
+            </>
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleUpdateThumbnailsWithUrls(false)}
+          disabled={isSeeding || isClearing || isUpdatingThumbnails || isTesting}
+          className="text-xs"
+          title="Update thumbnails with full URLs (only for assets without thumbnails)"
+        >
+          {isUpdatingThumbnails ? (
+            <>
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            <>
+              <ImageIcon className="w-3 h-3 mr-1" />
+              Update Thumbnails (URLs)
+            </>
+          )}
         </Button>
       </div>
 

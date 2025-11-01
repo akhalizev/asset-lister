@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -49,6 +49,40 @@ function formatUsername(fullName: string): string {
   return `${firstName}.${lastName}`;
 }
 
+// Memoized thumbnail cell to prevent flickering during virtualization
+const ThumbnailCell = React.memo(function ThumbnailCell({ asset }: { asset: Asset }) {
+  const fileConfig = fileTypeConfig[asset.assetType];
+  const Icon = fileConfig.icon;
+  const isVisual = asset.assetType === 'image' || asset.assetType === 'video';
+
+  return (
+    <div 
+      className="w-[110px] h-[60px] rounded overflow-hidden flex items-center justify-center bg-gray-100"
+      style={{ 
+        contain: 'layout style paint',
+      }}
+    >
+      {isVisual && asset.thumbnail ? (
+        <ImageWithFallback
+          key={`thumb-${asset.assetId}`}
+          src={asset.thumbnail}
+          alt={asset.assetId}
+          className="w-full h-full object-cover"
+          loading="eager"
+          fetchPriority="high"
+        />
+      ) : (
+        <Icon className={`w-6 h-6 ${fileConfig.color}`} aria-label="Asset thumbnail placeholder" />
+      )}
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Only re-render if asset ID or thumbnail actually changes
+  return prevProps.asset.assetId === nextProps.asset.assetId && 
+         prevProps.asset.thumbnail === nextProps.asset.thumbnail &&
+         prevProps.asset.assetType === nextProps.asset.assetType;
+});
+
 interface AssetDataTableProps {
   data: Asset[];
   onRowClick?: (asset: Asset) => void;
@@ -93,25 +127,7 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
       id: 'assetThumbnail',
       header: () => (<span className="px-2">Asset Thumbnail</span>),
       enableSorting: false,
-      cell: ({ row }) => {
-        const asset = row.original;
-        const fileConfig = fileTypeConfig[asset.assetType];
-        const Icon = fileConfig.icon;
-        const isVisual = asset.assetType === 'image' || asset.assetType === 'video';
-        return (
-          <div className="w-[110px] h-[60px] rounded overflow-hidden flex items-center justify-center bg-gray-100">
-            {isVisual && asset.thumbnail ? (
-              <ImageWithFallback
-                src={asset.thumbnail}
-                alt={asset.assetId}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Icon className={`w-6 h-6 ${fileConfig.color}`} aria-label="Asset thumbnail placeholder" />
-            )}
-          </div>
-        );
-      },
+      cell: ({ row }) => <ThumbnailCell asset={row.original} />,
       size: 160,
       enableResizing: true,
     });
@@ -378,7 +394,7 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 72, // Estimate row height to accommodate 60px thumbnails
-    overscan: 10, // Render extra rows outside viewport
+    overscan: 20, // Render more rows outside viewport to reduce remounts
   });
 
   return (
@@ -447,18 +463,26 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
                       <TableRow
                         key={row.id}
                         data-state={row.getIsSelected() && 'selected'}
-                        className="cursor-pointer hover:bg-gray-50"
-                        onClick={() => onRowClick?.(row.original)}
+                        className=""
                         style={{ height: virtualRow.size }}
                       >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </TableCell>
-                        ))}
+                        {row.getVisibleCells().map((cell) => {
+                          const isViewerTrigger = (variant === 'thumbnail'
+                            ? cell.column.id === 'assetThumbnail'
+                            : cell.column.id === 'assetId');
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              onClick={isViewerTrigger ? () => onRowClick?.(row.original) : undefined}
+                              className={isViewerTrigger ? 'cursor-pointer hover:bg-gray-50' : undefined}
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     );
                   })}

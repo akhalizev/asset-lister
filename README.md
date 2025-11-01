@@ -38,7 +38,7 @@
   - `device` text
   - `station` text
   - `userName` text
-  - `fileStatus` text check in ('available','expired')
+  - `fileStatus` text check in ('available','expired','recoverable')
   - `retentionSpan` text
   - `assetDuration` text
   - `assetSize` text

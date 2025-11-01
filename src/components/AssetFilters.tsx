@@ -52,6 +52,8 @@ export function AssetFilters({
   onDateRangeChange,
   onClearAllFilters
 }: AssetFiltersProps) {
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const buttonClickRef = React.useRef(false);
   const hasDateRange = dateRange.from || dateRange.to;
   const hasActiveFilters =
     !!searchQuery ||
@@ -62,6 +64,29 @@ export function AssetFilters({
 
   const clearDateRange = () => {
     onDateRangeChange({ from: undefined, to: undefined });
+  };
+
+  const handlePopoverOpenChange = (open: boolean) => {
+    if (open) {
+      // Reset the ref when opening the popover
+      buttonClickRef.current = false;
+    } else {
+      // Only clear if the button was explicitly clicked (not when clicking away)
+      if (buttonClickRef.current && hasDateRange) {
+        clearDateRange();
+      }
+      buttonClickRef.current = false;
+    }
+    setIsPopoverOpen(open);
+  };
+
+  const handleButtonMouseDown = () => {
+    // If popover is open and there's a date range, mark that button was clicked
+    if (isPopoverOpen && hasDateRange) {
+      buttonClickRef.current = true;
+    } else {
+      buttonClickRef.current = false;
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -88,9 +113,13 @@ export function AssetFilters({
       </div>
       
       <div className="flex gap-2 items-center flex-wrap">
-        <Popover>
+        <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="justify-start text-left">
+            <Button 
+              variant="outline" 
+              className="justify-start text-left"
+              onMouseDown={handleButtonMouseDown}
+            >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {dateRange.from ? (
                 dateRange.to ? (
