@@ -38,7 +38,7 @@ export function AssetFilters({
   onViewModeChange,
   density,
   onDensityChange,
-  tableVariant = 'id',
+  tableVariant = 'thumbnail',
   onTableVariantChange,
   searchQuery,
   onSearchChange,

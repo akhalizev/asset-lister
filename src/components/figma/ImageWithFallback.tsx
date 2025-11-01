@@ -102,7 +102,7 @@ export const ImageWithFallback = React.memo(function ImageWithFallback(props: Re
     }
   }
 
-  // Check if image is already loaded on mount/remount
+  // Check if image is already loaded on mount/remount - reset error state
   useEffect(() => {
     if (!normalizedSrc) return
     
@@ -110,6 +110,10 @@ export const ImageWithFallback = React.memo(function ImageWithFallback(props: Re
     if (img && img.complete && img.naturalWidth !== 0) {
       imageCache.add(normalizedSrc)
       loadedImages.set(normalizedSrc, img)
+      setDidError(false) // Reset error state if image is already loaded
+    } else {
+      // Reset error state when component remounts
+      setDidError(false)
     }
   }, [normalizedSrc])
 

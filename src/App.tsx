@@ -14,9 +14,9 @@ import { SupabaseSeeder } from './components/SupabaseSeeder';
 export default function App() {
   const [useLargeDataset, setUseLargeDataset] = useState(false);
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [density, setDensity] = useState<'comfortable' | 'compact' | 'minimal' | 'horizontal'>('comfortable');
-  const [tableVariant, setTableVariant] = useState<'id' | 'thumbnail'>('id');
+  const [tableVariant, setTableVariant] = useState<'id' | 'thumbnail'>('thumbnail');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedType, setSelectedType] = useState<AssetType | 'all'>('all');

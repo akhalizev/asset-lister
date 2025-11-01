@@ -49,39 +49,39 @@ function formatUsername(fullName: string): string {
   return `${firstName}.${lastName}`;
 }
 
-// Memoized thumbnail cell to prevent flickering during virtualization
-const ThumbnailCell = React.memo(function ThumbnailCell({ asset }: { asset: Asset }) {
+// Thumbnail cell component - simplified for virtualization stability
+function ThumbnailCell({ asset, rowKey }: { asset: Asset; rowKey: string }) {
   const fileConfig = fileTypeConfig[asset.assetType];
   const Icon = fileConfig.icon;
   const isVisual = asset.assetType === 'image' || asset.assetType === 'video';
+  const [imageError, setImageError] = React.useState(false);
+
+  // Reset error state when component remounts or thumbnail changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [asset.thumbnail, rowKey]);
 
   return (
     <div 
       className="w-[110px] h-[60px] rounded overflow-hidden flex items-center justify-center bg-gray-100"
-      style={{ 
-        contain: 'layout style paint',
-      }}
     >
-      {isVisual && asset.thumbnail ? (
-        <ImageWithFallback
-          key={`thumb-${asset.assetId}`}
+      {isVisual && asset.thumbnail && !imageError ? (
+        <img
+          key={`thumb-${rowKey}-${asset.assetId}`}
           src={asset.thumbnail}
           alt={asset.assetId}
           className="w-full h-full object-cover"
           loading="eager"
-          fetchPriority="high"
+          fetchpriority="high"
+          onError={() => setImageError(true)}
+          onLoad={() => setImageError(false)}
         />
       ) : (
         <Icon className={`w-6 h-6 ${fileConfig.color}`} aria-label="Asset thumbnail placeholder" />
       )}
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Only re-render if asset ID or thumbnail actually changes
-  return prevProps.asset.assetId === nextProps.asset.assetId && 
-         prevProps.asset.thumbnail === nextProps.asset.thumbnail &&
-         prevProps.asset.assetType === nextProps.asset.assetType;
-});
+}
 
 interface AssetDataTableProps {
   data: Asset[];
@@ -127,7 +127,7 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
       id: 'assetThumbnail',
       header: () => (<span className="px-2">Asset Thumbnail</span>),
       enableSorting: false,
-      cell: ({ row }) => <ThumbnailCell asset={row.original} />,
+      cell: ({ row }) => <ThumbnailCell asset={row.original} rowKey={row.id} />,
       size: 160,
       enableResizing: true,
     });
@@ -394,7 +394,7 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 72, // Estimate row height to accommodate 60px thumbnails
-    overscan: 20, // Render more rows outside viewport to reduce remounts
+    overscan: 50, // Increase overscan to keep more rows mounted and reduce thumbnail disappearing
   });
 
   return (
