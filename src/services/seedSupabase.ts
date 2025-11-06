@@ -27,6 +27,7 @@ function assetToSupabaseRow(asset: Asset, useAutoId: boolean = false): any {
     assetduration: asset.assetDuration,
     assetsize: asset.assetSize,
     thumbnail: asset.thumbnail || null,
+    unitid: asset.unitId || null,
   };
 
   // Only include id if not using auto-generated IDs
@@ -70,6 +71,18 @@ async function insertBatch(assets: Asset[], useAutoId: boolean = false): Promise
       code: error.code,
       fullError: error
     });
+    
+    // Check if the error is about missing unitid column
+    if (error.code === 'PGRST204' && error.message?.includes('unitid')) {
+      const helpfulMessage = `Insert failed: The 'unitid' column is missing from the 'assets' table.\n\n` +
+        `To fix this, run this SQL in your Supabase SQL Editor:\n\n` +
+        `ALTER TABLE public.assets\n` +
+        `ADD COLUMN IF NOT EXISTS unitid text;\n\n` +
+        `Or use the migration file: supabase/migrations/add_unitid_column.sql`;
+      console.error(helpfulMessage);
+      throw new Error(helpfulMessage);
+    }
+    
     throw new Error(`Insert failed: ${error.message}${error.details ? ` - ${error.details}` : ''}${error.hint ? ` (Hint: ${error.hint})` : ''}`);
   }
 

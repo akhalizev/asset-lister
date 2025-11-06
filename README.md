@@ -43,8 +43,21 @@
   - `assetDuration` text
   - `assetSize` text
   - `thumbnail` text (optional url)
+  - `unitId` text (optional, for recording device identification)
   
   Tip: If you use `uuid` for `id`, the app coerces to string automatically.
+  
+  ### Adding the unitid column (if missing)
+  
+  If you're getting errors when fetching assets, you may need to add the `unitid` column. 
+  Run this SQL in your Supabase SQL Editor:
+  
+  ```sql
+  ALTER TABLE public.assets
+  ADD COLUMN IF NOT EXISTS unitid text;
+  ```
+  
+  Or use the migration file: `supabase/migrations/add_unitid_column.sql`
   
   4. Start the app. If env vars are present and the table has rows, the UI will load from Supabase; otherwise it falls back to local mock data.
 

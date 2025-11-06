@@ -20,4 +20,5 @@ export interface Asset {
   assetDuration: string;
   assetSize: string;
   thumbnail?: string;
+  unitId?: string;
 }

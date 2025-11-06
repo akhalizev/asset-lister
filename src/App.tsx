@@ -136,37 +136,41 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AssetFilters
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          density={density}
-          onDensityChange={setDensity}
-          tableVariant={tableVariant}
-          onTableVariantChange={setTableVariant}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedType={selectedType}
-          onTypeChange={setSelectedType}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          dateRange={dateRange}
-          onDateRangeChange={setDateRange}
-          onClearAllFilters={handleClearAllFilters}
-        />
+      <main className="w-full py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AssetFilters
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            density={density}
+            onDensityChange={setDensity}
+            tableVariant={tableVariant}
+            onTableVariantChange={setTableVariant}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            selectedType={selectedType}
+            onTypeChange={setSelectedType}
+            selectedStatus={selectedStatus}
+            onStatusChange={setSelectedStatus}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            onClearAllFilters={handleClearAllFilters}
+          />
+        </div>
 
         {filteredAssets.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">No assets found matching your filters.</p>
           </div>
         ) : viewMode === 'grid' ? (
-          <AssetCardGrid
-            data={filteredAssets}
-            density={density}
-            onAssetClick={handleAssetClick}
-          />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AssetCardGrid
+              data={filteredAssets}
+              density={density}
+              onAssetClick={handleAssetClick}
+            />
+          </div>
         ) : (
           <AssetDataTable
             data={filteredAssets}

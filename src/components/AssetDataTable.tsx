@@ -157,10 +157,14 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
     cell: ({ row }) => {
       const asset = row.original;
       const fileConfig = fileTypeConfig[asset.assetType];
+      // Format assetId with SMG- prefix
+      const formattedAssetId = asset.assetId.startsWith('SMG-') 
+        ? asset.assetId 
+        : `SMG-${asset.assetId}`;
       if (variant === 'thumbnail') {
         return (
           <div className="min-w-0 flex flex-col">
-            <div className="font-mono text-sm truncate" title={asset.assetId}>{asset.assetId}</div>
+            <div className="font-mono text-sm truncate" title={formattedAssetId}>{formattedAssetId}</div>
             <div className="text-xs text-gray-500 truncate" title={fileConfig.label}>{fileConfig.label}</div>
             <div className="mt-0.5">
               <Badge className={statusColors[asset.fileStatus]} variant="outline">
@@ -174,7 +178,7 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
       return (
         <div className="flex items-center gap-2">
           <Icon className={`w-4 h-4 ${fileConfig.color} shrink-0`} />
-          <span className="font-mono text-sm">{row.getValue('assetId')}</span>
+          <span className="font-mono text-sm">{formattedAssetId}</span>
         </div>
       );
     },
@@ -201,6 +205,8 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
           </Button>
         );
       },
+      size: 150,
+      minSize: 120,
     });
   columns.push({
       accessorKey: 'caseId',
@@ -208,6 +214,8 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
       cell: ({ row }) => (
         <span className="font-mono text-sm">{row.getValue('caseId')}</span>
       ),
+      size: 150,
+      minSize: 120,
     });
   columns.push({
       accessorKey: 'cadId',
@@ -215,6 +223,8 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
       cell: ({ row }) => (
         <span className="font-mono text-sm">{row.getValue('cadId')}</span>
       ),
+      size: 120,
+      minSize: 100,
     });
   columns.push({
       accessorKey: 'capturedOn',
@@ -244,6 +254,8 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
           </span>
         );
       },
+      size: 180,
+      minSize: 160,
     });
   columns.push({
       accessorKey: 'uploaded',
@@ -273,6 +285,8 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
           </span>
         );
       },
+      size: 180,
+      minSize: 160,
     });
   columns.push({
       accessorKey: 'assetType',
@@ -281,14 +295,20 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
         const type = row.getValue('assetType') as keyof typeof fileTypeConfig;
         return fileTypeConfig[type].label;
       },
+      size: 100,
+      minSize: 80,
     });
   columns.push({
       accessorKey: 'device',
       header: 'Device',
+      size: 150,
+      minSize: 120,
     });
   columns.push({
       accessorKey: 'station',
       header: 'Station',
+      size: 120,
+      minSize: 100,
     });
   columns.push({
       accessorKey: 'userName',
@@ -304,6 +324,8 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
           </div>
         );
       },
+      size: 150,
+      minSize: 120,
     });
   if (variant !== 'thumbnail') {
     columns.push({
@@ -339,10 +361,14 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
   columns.push({
       accessorKey: 'retentionSpan',
       header: 'Retention',
+      size: 120,
+      minSize: 100,
     });
   columns.push({
       accessorKey: 'assetDuration',
       header: 'Duration',
+      size: 100,
+      minSize: 80,
     });
   columns.push({
       accessorKey: 'assetSize',
@@ -364,8 +390,21 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
           </Button>
         );
       },
+      size: 120,
+      minSize: 100,
     });
-  
+  columns.push({
+      accessorKey: 'unitId',
+      header: 'Unit ID',
+      cell: ({ row }) => {
+        const unitId = row.getValue('unitId') as string | undefined;
+        return (
+          <span className="font-mono text-sm">{unitId || 'N/A'}</span>
+        );
+      },
+      size: 120,
+      minSize: 100,
+    });
 
   const table = useReactTable({
     data,
@@ -397,11 +436,79 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
     overscan: 50, // Increase overscan to keep more rows mounted and reduce thumbnail disappearing
   });
 
+  const tableTotalWidth = table.getCenterTotalSize();
+  const minTableWidth = Math.max(tableTotalWidth, 1200); // Ensure minimum width for scrolling
+
+  // Create a ref for horizontal scroll synchronization
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+
+  // Sync horizontal scrolling between table and bottom scrollbar
+  React.useEffect(() => {
+    const tableScroll = tableScrollRef.current;
+    const horizontalScroll = horizontalScrollRef.current;
+    
+    if (!tableScroll || !horizontalScroll) return;
+
+    let isScrollingTable = false;
+    let isScrollingHorizontal = false;
+
+    const handleTableScroll = () => {
+      if (!isScrollingHorizontal && horizontalScroll) {
+        isScrollingTable = true;
+        horizontalScroll.scrollLeft = tableScroll.scrollLeft;
+        requestAnimationFrame(() => {
+          isScrollingTable = false;
+        });
+      }
+    };
+
+    const handleHorizontalScroll = () => {
+      if (!isScrollingTable && tableScroll) {
+        isScrollingHorizontal = true;
+        tableScroll.scrollLeft = horizontalScroll.scrollLeft;
+        requestAnimationFrame(() => {
+          isScrollingHorizontal = false;
+        });
+      }
+    };
+
+    tableScroll.addEventListener('scroll', handleTableScroll, { passive: true });
+    horizontalScroll.addEventListener('scroll', handleHorizontalScroll, { passive: true });
+
+    return () => {
+      tableScroll.removeEventListener('scroll', handleTableScroll);
+      horizontalScroll.removeEventListener('scroll', handleHorizontalScroll);
+    };
+  }, []);
+
   return (
-    <div className="space-y-4">
-      <div className="border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto" ref={tableContainerRef} style={{ maxHeight: '600px', overflowY: 'auto' }}>
-          <Table style={{ width: table.getCenterTotalSize() }}>
+    <div className="space-y-4" style={{ width: '90%', margin: '0 auto' }}>
+      <div className="border rounded-lg" style={{ overflow: 'hidden', position: 'relative' }}>
+        {/* Vertical and horizontal scroll container */}
+        <div 
+          ref={(el) => {
+            tableContainerRef.current = el;
+            tableScrollRef.current = el;
+          }}
+          style={{ 
+            maxHeight: '600px', 
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            width: '100%',
+            position: 'relative'
+          }}
+          onScroll={(e) => {
+            if (horizontalScrollRef.current) {
+              horizontalScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
+            }
+          }}
+        >
+          <div style={{ width: minTableWidth }}>
+            <table 
+              className="w-full caption-bottom text-sm"
+              style={{ width: minTableWidth, borderCollapse: 'collapse' }}
+            >
             {/* Ensure consistent column widths between header and body */}
             {table.getHeaderGroups().length > 0 && (
               <colgroup>
@@ -410,11 +517,11 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
                 ))}
               </colgroup>
             )}
-            <TableHeader className="sticky top-0 z-10 bg-white">
+            <thead className="[&_tr]:border-b sticky top-0 z-10 bg-white">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <tr key={headerGroup.id} className="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors">
                   {headerGroup.headers.map((header) => (
-                    <TableHead 
+                    <th 
                       key={header.id}
                       style={{
                         position: 'relative',
@@ -438,12 +545,12 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
                           }}
                         />
                       )}
-                    </TableHead>
+                    </th>
                   ))}
-                </TableRow>
+                </tr>
               ))}
-            </TableHeader>
-            <TableBody>
+            </thead>
+            <tbody className="[&_tr:last-child]:border-0">
               {rows.length ? (
                 <>
                   {/* Top spacer to push the first rendered row into view position */}
@@ -451,19 +558,19 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
                     const items = virtualizer.getVirtualItems();
                     const top = items.length > 0 ? items[0].start : 0;
                     return top > 0 ? (
-                      <TableRow aria-hidden>
-                        <TableCell colSpan={columns.length} style={{ height: top }} />
-                      </TableRow>
+                      <tr aria-hidden>
+                        <td colSpan={columns.length} style={{ height: top }} />
+                      </tr>
                     ) : null;
                   })()}
 
                   {virtualizer.getVirtualItems().map((virtualRow) => {
                     const row = rows[virtualRow.index];
                     return (
-                      <TableRow
+                      <tr
                         key={row.id}
                         data-state={row.getIsSelected() && 'selected'}
-                        className=""
+                        className="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
                         style={{ height: virtualRow.size }}
                       >
                         {row.getVisibleCells().map((cell) => {
@@ -471,19 +578,19 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
                             ? cell.column.id === 'assetThumbnail'
                             : cell.column.id === 'assetId');
                           return (
-                            <TableCell
+                            <td
                               key={cell.id}
                               onClick={isViewerTrigger ? () => onRowClick?.(row.original) : undefined}
-                              className={isViewerTrigger ? 'cursor-pointer hover:bg-gray-50' : undefined}
+                              className={`p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] ${isViewerTrigger ? 'cursor-pointer hover:bg-gray-50' : ''}`}
                             >
                               {flexRender(
                                 cell.column.columnDef.cell,
                                 cell.getContext()
                               )}
-                            </TableCell>
+                            </td>
                           );
                         })}
-                      </TableRow>
+                      </tr>
                     );
                   })}
 
@@ -494,24 +601,45 @@ export function AssetDataTable({ data, onRowClick, variant = 'id' }: AssetDataTa
                     const end = items.length > 0 ? items[items.length - 1].end : 0;
                     const bottom = Math.max(total - end, 0);
                     return bottom > 0 ? (
-                      <TableRow aria-hidden>
-                        <TableCell colSpan={columns.length} style={{ height: bottom }} />
-                      </TableRow>
+                      <tr aria-hidden>
+                        <td colSpan={columns.length} style={{ height: bottom }} />
+                      </tr>
                     ) : null;
                   })()}
                 </>
               ) : (
-                <TableRow>
-                  <TableCell
+                <tr>
+                  <td
                     colSpan={columns.length}
-                    className="h-24 text-center"
+                    className="h-24 text-center p-2 align-middle whitespace-nowrap"
                   >
                     No results.
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               )}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
+          </div>
+        </div>
+        {/* Horizontal scrollbar - always visible at bottom */}
+        <div 
+          ref={horizontalScrollRef}
+          style={{ 
+            overflowX: 'scroll',
+            overflowY: 'hidden',
+            width: '100%',
+            height: '17px',
+            borderTop: '1px solid #e5e7eb',
+            backgroundColor: '#f9fafb',
+            cursor: 'pointer'
+          }}
+          onScroll={(e) => {
+            if (tableScrollRef.current) {
+              tableScrollRef.current.scrollLeft = e.currentTarget.scrollLeft;
+            }
+          }}
+        >
+          <div style={{ height: '1px', width: minTableWidth }}></div>
         </div>
       </div>
 

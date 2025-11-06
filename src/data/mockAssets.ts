@@ -31,7 +31,7 @@ function getThumbnailForAsset(assetId: string, assetType: AssetType): string | u
 const baseAssets: Asset[] = [
   {
     id: '1',
-    assetId: 'AST-2024-001',
+    assetId: 'SMG-AST-2024-001',
     category: 'Body Cam',
     caseId: 'CASE-2024-1523',
     cadId: 'CAD-45782',
@@ -46,11 +46,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:12:34',
     assetSize: '245.8 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-001', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-001', 'video'),
+    unitId: 'BWC-S01-042'
   },
   {
     id: '2',
-    assetId: 'AST-2024-002',
+    assetId: 'SMG-AST-2024-002',
     category: 'Crime Scene',
     caseId: 'CASE-2024-1501',
     cadId: 'CAD-45690',
@@ -65,11 +66,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: 'N/A',
     assetSize: '8.4 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-002', 'image')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-002', 'image'),
+    unitId: undefined
   },
   {
     id: '3',
-    assetId: 'AST-2024-003',
+    assetId: 'SMG-AST-2024-003',
     category: 'Interview',
     caseId: 'CASE-2024-1498',
     cadId: 'CAD-45623',
@@ -84,11 +86,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '5 years',
     assetDuration: '00:45:12',
     assetSize: '42.1 MB',
-    thumbnail: undefined
+    thumbnail: undefined,
+    unitId: 'AUD-2024-156'
   },
   {
     id: '4',
-    assetId: 'AST-2024-004',
+    assetId: 'SMG-AST-2024-004',
     category: 'Dash Cam',
     caseId: 'CASE-2024-1530',
     cadId: 'CAD-45801',
@@ -103,11 +106,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:18:45',
     assetSize: '356.2 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-004', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-004', 'video'),
+    unitId: 'ICV-0234'
   },
   {
     id: '5',
-    assetId: 'AST-2024-005',
+    assetId: 'SMG-AST-2024-005',
     category: 'Documentation',
     caseId: 'CASE-2024-1495',
     cadId: 'CAD-45598',
@@ -122,11 +126,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '5 years',
     assetDuration: 'N/A',
     assetSize: '2.3 MB',
-    thumbnail: undefined
+    thumbnail: undefined,
+    unitId: undefined
   },
   {
     id: '6',
-    assetId: 'AST-2024-006',
+    assetId: 'SMG-AST-2024-006',
     category: 'Body Cam',
     caseId: 'CASE-2024-1520',
     cadId: 'CAD-45765',
@@ -141,11 +146,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:08:23',
     assetSize: '165.4 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-006', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-006', 'video'),
+    unitId: 'BWC-089'
   },
   {
     id: '7',
-    assetId: 'AST-2024-007',
+    assetId: 'SMG-AST-2024-007',
     category: 'Crime Scene',
     caseId: 'CASE-2024-1535',
     cadId: 'CAD-45820',
@@ -160,11 +166,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '3 years',
     assetDuration: 'N/A',
     assetSize: '45.7 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-007', 'image')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-007', 'image'),
+    unitId: undefined
   },
   {
     id: '8',
-    assetId: 'AST-2024-008',
+    assetId: 'SMG-AST-2024-008',
     category: 'Surveillance',
     caseId: 'CASE-2024-1512',
     cadId: 'CAD-45723',
@@ -179,11 +186,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: '00:03:47',
     assetSize: '128.9 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-008', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-008', 'video'),
+    unitId: 'CCTV-S03-127'
   },
   {
     id: '9',
-    assetId: 'AST-2024-009',
+    assetId: 'SMG-AST-2024-009',
     category: 'Audio Recording',
     caseId: 'CASE-2024-1508',
     cadId: 'CAD-45705',
@@ -198,11 +206,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '00:04:32',
     assetSize: '5.2 MB',
-    thumbnail: undefined
+    thumbnail: undefined,
+    unitId: 'DVR-2024-089'
   },
   {
     id: '10',
-    assetId: 'AST-2024-010',
+    assetId: 'SMG-AST-2024-010',
     category: 'Documentation',
     caseId: 'CASE-2024-1501',
     cadId: 'CAD-45690',
@@ -217,11 +226,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: 'N/A',
     assetSize: '1.8 MB',
-    thumbnail: undefined
+    thumbnail: undefined,
+    unitId: undefined
   },
   {
     id: '11',
-    assetId: 'AST-2024-011',
+    assetId: 'SMG-AST-2024-011',
     category: 'Aerial',
     caseId: 'CASE-2024-1528',
     cadId: 'CAD-45795',
@@ -236,11 +246,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '5 years',
     assetDuration: '00:32:18',
     assetSize: '892.3 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-011', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-011', 'video'),
+    unitId: 'DRN-0045'
   },
   {
     id: '12',
-    assetId: 'AST-2024-012',
+    assetId: 'SMG-AST-2024-012',
     category: 'Body Cam',
     caseId: 'N/A',
     cadId: 'N/A',
@@ -255,11 +266,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '1 year',
     assetDuration: '01:15:22',
     assetSize: '478.6 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-012', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-012', 'video'),
+    unitId: 'BWC-156'
   },
   {
     id: '13',
-    assetId: 'AST-2024-013',
+    assetId: 'SMG-AST-2024-013',
     category: 'Crime Scene',
     caseId: 'CASE-2024-1512',
     cadId: 'CAD-45723',
@@ -274,11 +286,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '10 years',
     assetDuration: 'N/A',
     assetSize: '12.6 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-013', 'image')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-013', 'image'),
+    unitId: undefined
   },
   {
     id: '14',
-    assetId: 'AST-2024-014',
+    assetId: 'SMG-AST-2024-014',
     category: 'Training',
     caseId: 'N/A',
     cadId: 'N/A',
@@ -293,11 +306,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '2 years',
     assetDuration: '02:45:00',
     assetSize: '1.2 GB',
-    thumbnail: getThumbnailForAsset('AST-2024-014', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-014', 'video'),
+    unitId: 'DVR-2024-234'
   },
   {
     id: '15',
-    assetId: 'AST-2024-015',
+    assetId: 'SMG-AST-2024-015',
     category: 'Dash Cam',
     caseId: 'CASE-2024-1540',
     cadId: 'CAD-45835',
@@ -312,11 +326,12 @@ const baseAssets: Asset[] = [
     retentionSpan: '90 days',
     assetDuration: '04:12:35',
     assetSize: '2.8 GB',
-    thumbnail: getThumbnailForAsset('AST-2024-015', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-015', 'video'),
+    unitId: 'CAR-S02-567'
   },
   {
     id: '16',
-    assetId: 'AST-2024-016',
+    assetId: 'SMG-AST-2024-016',
     category: 'Interview',
     caseId: 'CASE-2024-1520',
     cadId: 'CAD-45765',
@@ -331,7 +346,8 @@ const baseAssets: Asset[] = [
     retentionSpan: '7 years',
     assetDuration: '01:23:45',
     assetSize: '624.3 MB',
-    thumbnail: getThumbnailForAsset('AST-2024-016', 'video')
+    thumbnail: getThumbnailForAsset('SMG-AST-2024-016', 'video'),
+    unitId: 'CCTV-S02-009'
   }
 ];
 
@@ -347,6 +363,25 @@ const devices = [
   'Evidence System', 'DJI Mavic 3', 'Training Camera', 'Interview Room Cam',
   'Axon Fleet 3', 'Panasonic HC-X2000', 'Sony A7R IV'
 ];
+
+// Unit ID prefixes for different device types
+const unitIdPrefixes = [
+  'BWC',   // Body Worn Camera
+  'CAR',   // Car/Vehicle Camera
+  'FLT',   // Fleet Camera
+  'ICV',   // In-Car Video
+  'DVR',   // Digital Video Recorder
+  'CCTV',  // Closed Circuit TV
+  'DRN',   // Drone
+  'AUD',   // Audio Recorder
+  'UNIT',  // Generic Unit
+  'VHC',   // Vehicle
+  'PAT',   // Patrol
+  'RES',   // Response Unit
+];
+
+// Station codes for unit IDs
+const stationCodes = ['01', '02', '03', '04', '05', 'N', 'S', 'E', 'W', 'HQ'];
 
 const stations = [
   'Station 01', 'Station 02', 'Station 03', 'Station 04', 'Station 05',
@@ -445,9 +480,65 @@ function generateMockAsset(id: number): Asset {
     assetSize = formatSizeMB(Math.random() * 5 + 0.5); // 0.5-5.5 MB
   }
   
+  // Generate unitId with variety based on device type and category
+  let unitId: string | undefined = undefined;
+  
+  // Determine if this asset should have a unit ID based on category and device
+  const hasUnitId = 
+    category === 'Body Cam' || 
+    category === 'Dash Cam' || 
+    category === 'Surveillance' ||
+    category === 'Aerial' ||
+    category === 'Audio Recording' ||
+    device.includes('Body') || 
+    device.includes('Dash') || 
+    device.includes('Fleet') ||
+    device.includes('CCTV') ||
+    device.includes('Drone') ||
+    device.includes('Mavic') ||
+    device.includes('Video') ||
+    device.includes('Camera');
+  
+  if (hasUnitId) {
+    const prefix = unitIdPrefixes[Math.floor(Math.random() * unitIdPrefixes.length)];
+    const stationCode = Math.random() > 0.5 ? stationCodes[Math.floor(Math.random() * stationCodes.length)] : null;
+    
+    // Create variety in unit ID formats
+    const formatType = Math.floor(Math.random() * 4);
+    let unitNumber: string;
+    
+    switch (formatType) {
+      case 0:
+        // Format: BWC-001
+        unitNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        unitId = `${prefix}-${unitNumber}`;
+        break;
+      case 1:
+        // Format: BWC-S01-001 (with station code)
+        unitNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        unitId = stationCode ? `${prefix}-S${stationCode}-${unitNumber}` : `${prefix}-${unitNumber}`;
+        break;
+      case 2:
+        // Format: BWC001 (no dash)
+        unitNumber = String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0');
+        unitId = `${prefix}${unitNumber}`;
+        break;
+      case 3:
+        // Format: BWC-2024-001 (with year)
+        unitNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        unitId = `${prefix}-2024-${unitNumber}`;
+        break;
+      default:
+        unitNumber = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        unitId = `${prefix}-${unitNumber}`;
+    }
+  }
+  
+  const assetId = `SMG-AST-2024-${String(id).padStart(6, '0')}`;
+  
   return {
     id: String(id),
-    assetId: `AST-2024-${String(id).padStart(6, '0')}`,
+    assetId,
     category,
     caseId,
     cadId,
@@ -462,7 +553,8 @@ function generateMockAsset(id: number): Asset {
     retentionSpan,
     assetDuration,
     assetSize,
-    thumbnail: getThumbnailForAsset(`AST-2024-${String(id).padStart(6, '0')}`, assetType)
+    thumbnail: getThumbnailForAsset(assetId, assetType),
+    unitId
   };
 }
 
